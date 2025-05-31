@@ -2,13 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>💀 Randomly Common Skelly Search 💀</title>
+  <title>💀 Randomly Common Skeles Search 💀</title>
   <style>
     body {
       background-color: #121212;
       color: #e0e0e0;
       font-family: sans-serif;
       margin: 20px;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 1200px;
+      width: 100%;
     }
     h1 {
       text-align: center;
@@ -202,29 +208,31 @@
   </style>
 </head>
 <body>
-  <img src="https://assets.objkt.media/file/assets-004/h/tz1iZ2TPEShFC8TqHsXLA9RXdV7tSv8E3aLe/thumb400?cb=ffd03ab2" alt="Skelly Logo" style="display: block; margin: 0 auto; max-width: 80px;"/>
-  <h1>💀 Randomly Common Skelly Search 💀</h1>
+  <div class="container">
+    <img src="https://assets.objkt.media/file/assets-004/h/tz1iZ2TPEShFC8TqHsXLA9RXdV7tSv8E3aLe/thumb400?cb=ffd03ab2" alt="Skelly Logo" style="display: block; margin: 0 auto; max-width: 80px;"/>
+    <h1>💀 Randomly Common Skeles Search 💀</h1>
 
-  <div class="search-bar" id="search-bar"></div>
+    <div class="search-bar" id="search-bar"></div>
 
-  <div class="controls">
-    <label>
-      <input type="checkbox" id="only-listed"/> Only Listed
-    </label>
-    <label>
-      Sort by Price:
-      <select id="sort-order">
-        <option value="none">None</option>
-        <option value="asc">Low → High</option>
-        <option value="desc">High → Low</option>
-      </select>
-    </label>
-    <label>
-      <input type="checkbox" id="show-favorites"/> Show Favorites
-    </label>
+    <div class="controls">
+      <label>
+        <input type="checkbox" id="only-listed"/> Only Listed
+      </label>
+      <label>
+        Sort by Price:
+        <select id="sort-order">
+          <option value="none">None</option>
+          <option value="asc">Low → High</option>
+          <option value="desc">High → Low</option>
+        </select>
+      </label>
+      <label>
+        <input type="checkbox" id="show-favorites"/> Show Favorites
+      </label>
+    </div>
+
+    <div id="gallery">Loading…</div>
   </div>
-
-  <div id="gallery">Loading…</div>
 
   <script>
   (async () => {
