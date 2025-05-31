@@ -42,13 +42,44 @@
     .controls {
       display: flex;
       justify-content: center;
-      gap: 16px;
+      align-items: center;
+      gap: 32px;
       margin-bottom: 20px;
+      background: #181818;
+      border-radius: 8px;
+      padding: 10px 24px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    .controls label,
-    .controls select {
-      font-size: 0.9em;
+    .controls label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 1em;
       color: #e0e0e0;
+      margin: 0;
+    }
+    .controls select {
+      background: #181818;
+      color: #e0e0e0;
+      border: 1px solid #444;
+      border-radius: 4px;
+      padding: 4px 10px;
+      font-size: 1em;
+      outline: none;
+      margin-left: 4px;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      transition: border 0.2s;
+    }
+    .controls select:focus {
+      border: 1.5px solid #9cdcfe;
+    }
+    .controls input[type="checkbox"] {
+      accent-color: #9cdcfe;
+      width: 18px;
+      height: 18px;
+      margin-right: 4px;
     }
     #gallery {
       display: grid;
