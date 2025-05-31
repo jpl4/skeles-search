@@ -15,6 +15,14 @@
     .container {
       max-width: 1800px;
       width: 100%;
+      margin: 0 auto;
+    }
+    .main-content {
+      max-width: 1800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     h1 {
       text-align: center;
@@ -46,11 +54,12 @@
       margin-left: 8px;
     }
     .controls {
+      width: fit-content;
+      margin: 0 auto 20px auto;
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 32px;
-      margin-bottom: 20px;
       background: #181818;
       border-radius: 8px;
       padding: 10px 24px;
@@ -98,6 +107,7 @@
       gap: 16px;
       min-height: 100px;
       color: #888;
+      justify-content: center;
     }
     .card {
       position: relative;
@@ -211,27 +221,26 @@
   <div class="container">
     <img src="https://assets.objkt.media/file/assets-004/h/tz1iZ2TPEShFC8TqHsXLA9RXdV7tSv8E3aLe/thumb400?cb=ffd03ab2" alt="Skelly Logo" style="display: block; margin: 0 auto; max-width: 80px;"/>
     <h1>💀 Randomly Common Skeles Search 💀</h1>
-
-    <div class="search-bar" id="search-bar"></div>
-
-    <div class="controls">
-      <label>
-        <input type="checkbox" id="only-listed"/> Only Listed
-      </label>
-      <label>
-        Sort by Price:
-        <select id="sort-order">
-          <option value="none">None</option>
-          <option value="asc">Low → High</option>
-          <option value="desc">High → Low</option>
-        </select>
-      </label>
-      <label>
-        <input type="checkbox" id="show-favorites"/> Show Favorites
-      </label>
+    <div class="main-content">
+      <div class="search-bar" id="search-bar"></div>
+      <div class="controls">
+        <label>
+          <input type="checkbox" id="only-listed"/> Only Listed
+        </label>
+        <label>
+          Sort by Price:
+          <select id="sort-order">
+            <option value="none">None</option>
+            <option value="asc">Low → High</option>
+            <option value="desc">High → Low</option>
+          </select>
+        </label>
+        <label>
+          <input type="checkbox" id="show-favorites"/> Show Favorites
+        </label>
+      </div>
+      <div id="gallery">Loading…</div>
     </div>
-
-    <div id="gallery">Loading…</div>
   </div>
 
   <script>
