@@ -53,17 +53,9 @@
       cursor: pointer;
       margin-left: 8px;
     }
-    .gallery-block {
-      max-width: 1800px;
-      margin: 0 auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
     .controls {
-      width: fit-content;
-      min-width: 200px;
-      margin-bottom: 20px;
+      width: 100%;
+      margin: 0 auto 20px auto;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -111,13 +103,11 @@
     }
     #gallery {
       display: grid;
-      width: fit-content;
-      min-width: 200px;
       grid-template-columns: repeat(auto-fill, 200px);
       gap: 16px;
       min-height: 100px;
       color: #888;
-      justify-content: start;
+      width: 100%;
     }
     .card {
       position: relative;
@@ -231,7 +221,7 @@
   <div class="container">
     <img src="https://assets.objkt.media/file/assets-004/h/tz1iZ2TPEShFC8TqHsXLA9RXdV7tSv8E3aLe/thumb400?cb=ffd03ab2" alt="Skelly Logo" style="display: block; margin: 0 auto; max-width: 80px;"/>
     <h1>💀 Randomly Common Skeles Search 💀</h1>
-    <div class="gallery-block">
+    <div class="main-content">
       <div class="search-bar" id="search-bar"></div>
       <div class="controls">
         <label>
