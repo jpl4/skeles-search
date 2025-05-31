@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>💀 Randomly Common Skeles Search 💀</title>
+  <title>💀 Randomly Common Skelly Search 💀</title>
   <style>
     body {
       background-color: #121212;
@@ -104,8 +104,7 @@
       display: flex;
       flex-direction: column;
       justify-content: flex-start;
-      min-height: 340px;
-      max-width: 220px;
+      min-height: 260px;
     }
     .card:hover {
       transform: translateY(-4px);
@@ -114,7 +113,7 @@
     .card-img-container {
       position: relative;
       width: 100%;
-      min-height: 220px;
+      min-height: 180px;
       background: #222;
       display: flex;
       align-items: center;
@@ -128,8 +127,6 @@
       opacity: 0;
       transition: opacity 0.3s ease-in-out;
       z-index: 1;
-      min-height: 220px;
-      object-fit: contain;
     }
     .card img.loaded {
       opacity: 1;
@@ -140,15 +137,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #b0b0b0;
-      font-size: 1.15em;
-      font-family: inherit;
+      color: #888;
+      font-size: 1.1em;
       background: rgba(30,30,30,0.7);
       z-index: 2;
       pointer-events: none;
       transition: opacity 0.2s;
-      text-align: center;
-      font-weight: 500;
     }
     .card .img-overlay.hide {
       opacity: 0;
@@ -199,7 +193,7 @@
 </head>
 <body>
   <img src="https://assets.objkt.media/file/assets-004/h/tz1iZ2TPEShFC8TqHsXLA9RXdV7tSv8E3aLe/thumb400?cb=ffd03ab2" alt="Skelly Logo" style="display: block; margin: 0 auto; max-width: 80px;"/>
-  <h1>💀 Randomly Common Skeles Search 💀</h1>
+  <h1>💀 Randomly Common Skelly Search 💀</h1>
 
   <div class="search-bar" id="search-bar"></div>
 
@@ -377,7 +371,6 @@
         const img = card.querySelector('img');
         const overlay = card.querySelector('.img-overlay');
         loadImage(img).then(() => {
-          overlay.textContent = '';
           overlay.classList.add('hide');
         }).catch(() => {
           overlay.textContent = 'Failed to load';
