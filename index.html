@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>🔍 Emoji-Slot NFT Gallery (Paginated + Lazy Load)</title>
+  <title>💀 Randomly Common Skelly Search 💀</title>
   <style>
     body {
       background-color: #121212;
@@ -118,7 +118,8 @@
   </style>
 </head>
 <body>
-  <h1>🔍 Emoji-Slot NFT Gallery</h1>
+  <img src="https://assets.objkt.media/file/assets-004/h/tz1iZ2TPEShFC8TqHsXLA9RXdV7tSv8E3aLe/thumb400?cb=ffd03ab2" alt="Skelly Logo" style="display: block; margin: 0 auto; max-width: 80px;"/>
+  <h1>💀 Randomly Common Skelly Search 💀</h1>
 
   <div class="search-bar" id="search-bar"></div>
 
@@ -145,13 +146,10 @@
   (async () => {
     const CONTRACT   = 'KT1HZVd9Cjc2CMe3sQvXgbxhpJkdena21pih';
     const SLOT_COUNT = 8;
-    const PAGE_SIZE  = 100;
+    const PAGE_LIMIT = 1000;
     const STORAGE_KEY = 'nftFavorites';
 
-    let offset = 0;
-    let isLoading = false;
-    let hasMore = true;
-
+    // Load/save favorites from localStorage
     function loadFavorites() {
       try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY)) || []); }
       catch { return new Set(); }
@@ -161,7 +159,7 @@
     }
     let favorites = loadFavorites();
 
-    // Build 8 emoji‐slot inputs + Search button
+    // Build emoji inputs + Search button
     const bar = document.getElementById('search-bar');
     const inputs = [];
     for (let i = 0; i < SLOT_COUNT; i++) {
@@ -175,26 +173,9 @@
     btn.textContent = 'Search';
     bar.append(btn);
 
-    btn.addEventListener('click', () => {
-      document.getElementById('gallery').innerHTML = '';
-      offset = 0;
-      isLoading = false;
-      hasMore = true;
-      loadNextPage();
-    });
-    ['only-listed','sort-order','show-favorites'].forEach(id => {
-      document.getElementById(id).addEventListener('change', () => {
-        document.getElementById('gallery').innerHTML = '';
-        offset = 0;
-        hasMore = true;
-        loadNextPage();
-      });
-    });
-
-    async function loadNextPage() {
-      if (!hasMore || isLoading) return;
-      isLoading = true;
-
+    // Core fetch & render
+    async function fetchAndRender() {
+      // Build regex from inputs
       const slotPattern = inputs
         .map(inp => inp.value.trim()
           ? inp.value.trim().replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')
@@ -202,22 +183,21 @@
         .join('');
       const fullRegex = `^${slotPattern}.*`;
 
+      // GraphQL query
       const gql = `
       {
         token(
-          where:{
-            _and:[
-              { fa_contract:{_eq:"${CONTRACT}"} },
-              { name:{_iregex:"${fullRegex}"} }
+          where: {
+            _and: [
+              { fa_contract: { _eq: "${CONTRACT}" } },
+              { name:        { _iregex: "${fullRegex}" } }
             ]
           },
-          limit:${PAGE_SIZE},
-          offset:${offset}
+          limit: ${PAGE_LIMIT}
         ) {
           token_id
           name
           thumbnail_uri
-          artifact_uri
           listings_active { price_xtz }
         }
       }`;
@@ -227,56 +207,58 @@
         body: JSON.stringify({ query: gql })
       });
       const { data, errors } = await resp.json();
-      if (errors) { console.error(errors); isLoading = false; return; }
+      if (errors) {
+        console.error(errors);
+        document.getElementById('gallery').textContent = 'Error loading data.';
+        return;
+      }
 
-      const tokens = data.token;
-      if (tokens.length < PAGE_SIZE) hasMore = false;
-      offset += tokens.length;
-
-      appendTokensToGallery(tokens);
-      isLoading = false;
-    }
-
-    function appendTokensToGallery(tokens) {
-      const gallery = document.getElementById('gallery');
-      const onlyListed = document.getElementById('only-listed').checked;
-      const showFavs   = document.getElementById('show-favorites').checked;
-      const sortOrder  = document.getElementById('sort-order').value;
-
-      let batch = tokens.map(t => ({
+      // Map to tokens array
+      let tokens = data.token.map(t => ({
         id:    t.token_id,
         name:  t.name,
-        hash:  (t.thumbnail_uri || t.artifact_uri || '').replace('ipfs://',''),
+        hash:  (t.thumbnail_uri||'').replace('ipfs://',''),
         price: (t.listings_active[0]?.price_xtz||0)/1e6,
         listed: t.listings_active.length > 0
       }));
-      if (onlyListed) batch = batch.filter(t => t.listed);
-      if (showFavs)    batch = batch.filter(t => favorites.has(t.id.toString()));
-      if (sortOrder==='asc')  batch.sort((a,b)=>a.price - b.price);
-      if (sortOrder==='desc') batch.sort((a,b)=>b.price - a.price);
 
-      for (const t of batch) {
-        const isFav = favorites.has(t.id.toString());
+      // Apply filters/sorts
+      const onlyListed = document.getElementById('only-listed').checked;
+      const showFavs   = document.getElementById('show-favorites').checked;
+      const sortOrder  = document.getElementById('sort-order').value;
+      if (onlyListed) tokens = tokens.filter(t => t.listed);
+      if (showFavs)    tokens = tokens.filter(t => favorites.has(t.id.toString()));
+      if (sortOrder==='asc')  tokens.sort((a,b)=>a.price - b.price);
+      if (sortOrder==='desc') tokens.sort((a,b)=>b.price - a.price);
+
+      // Render gallery
+      const gallery = document.getElementById('gallery');
+      gallery.innerHTML = '';
+      if (tokens.length === 0) {
+        gallery.textContent = 'No matches.';
+        return;
+      }
+
+      for (const t of tokens) {
+        const imgUrl = t.hash ? `https://ipfs.io/ipfs/${t.hash}` : '';
+        const isFav  = favorites.has(t.id.toString());
+
+        // Create card
         const card = document.createElement('div');
         card.className = 'card' + (isFav ? ' favorited' : '');
 
+        // Build link + content
         card.innerHTML = `
           <a href="https://objkt.com/asset/${CONTRACT}/${t.id}" target="_blank">
-            <img loading="lazy" src="${t.hash ? `https://cloudflare-ipfs.com/ipfs/${t.hash}` : ''}" alt="${t.name}">
+            <img src="${imgUrl}" alt="${t.name}">
             <div class="info">
               <div class="name">${t.name}</div>
               <div class="price">${t.listed ? t.price.toFixed(3)+' XTZ' : 'Not listed'}</div>
             </div>
           </a>
         `;
-        const img = card.querySelector('img');
-        if (t.hash) {
-          img.onerror = () => {
-            img.onerror = null;
-            img.src = `https://ipfs.io/ipfs/${t.hash}`;
-          };
-        }
 
+        // Favorite button
         const favBtn = document.createElement('button');
         favBtn.className = 'favorite-btn';
         favBtn.textContent = isFav ? '★' : '☆';
@@ -301,13 +283,14 @@
       }
     }
 
-    window.addEventListener('scroll', () => {
-      if (window.innerHeight + window.scrollY >= document.body.scrollHeight - 200) {
-        loadNextPage();
-      }
-    });
+    // Wire up controls
+    btn.addEventListener('click', fetchAndRender);
+    document.getElementById('only-listed').addEventListener('change', fetchAndRender);
+    document.getElementById('sort-order').addEventListener('change', fetchAndRender);
+    document.getElementById('show-favorites').addEventListener('change', fetchAndRender);
 
-    loadNextPage();
+    // Initial load
+    fetchAndRender();
   })();
   </script>
 </body>
