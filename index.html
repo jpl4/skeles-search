@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <title>🔍 Emoji-Slot NFT Gallery with Artifact Fallback</title>
+  <title>💀 Randomly Common Skelly Search 💀</title>
   <style>
     body {
       background-color: #121212;
@@ -118,7 +118,8 @@
   </style>
 </head>
 <body>
-  <h1>🔍 Emoji-Slot NFT Gallery</h1>
+  <img src="https://assets.objkt.media/file/assets-004/h/tz1iZ2TPEShFC8TqHsXLA9RXdV7tSv8E3aLe/thumb400?cb=ffd03ab2" alt="Skelly Logo" style="display: block; margin: 0 auto; max-width: 80px;"/>
+  <h1>💀 Randomly Common Skelly Search 💀</h1>
 
   <div class="search-bar" id="search-bar"></div>
 
@@ -148,7 +149,7 @@
     const PAGE_LIMIT = 1000;
     const STORAGE_KEY = 'nftFavorites';
 
-    // Load favorites from localStorage
+    // Load/save favorites from localStorage
     function loadFavorites() {
       try { return new Set(JSON.parse(localStorage.getItem(STORAGE_KEY)) || []); }
       catch { return new Set(); }
@@ -158,7 +159,7 @@
     }
     let favorites = loadFavorites();
 
-    // Build the eight emoji‐slot inputs + Search button
+    // Build emoji inputs + Search button
     const bar = document.getElementById('search-bar');
     const inputs = [];
     for (let i = 0; i < SLOT_COUNT; i++) {
@@ -172,9 +173,9 @@
     btn.textContent = 'Search';
     bar.append(btn);
 
-    // Main fetch & render function
+    // Core fetch & render
     async function fetchAndRender() {
-      // Build a regex string from the eight inputs
+      // Build regex from inputs
       const slotPattern = inputs
         .map(inp => inp.value.trim()
           ? inp.value.trim().replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')
@@ -182,7 +183,7 @@
         .join('');
       const fullRegex = `^${slotPattern}.*`;
 
-      // GraphQL query (server‐side filtering with `_iregex`)
+      // GraphQL query
       const gql = `
       {
         token(
@@ -197,7 +198,6 @@
           token_id
           name
           thumbnail_uri
-          artifact_uri
           listings_active { price_xtz }
         }
       }`;
@@ -213,17 +213,16 @@
         return;
       }
 
-      // Map into a JS array with fallback from thumbnail_uri → artifact_uri
+      // Map to tokens array
       let tokens = data.token.map(t => ({
         id:    t.token_id,
         name:  t.name,
-        // ← Here is the important change:
-        hash:  (t.thumbnail_uri || t.artifact_uri || '').replace('ipfs://',''),
+        hash:  (t.thumbnail_uri||'').replace('ipfs://',''),
         price: (t.listings_active[0]?.price_xtz||0)/1e6,
         listed: t.listings_active.length > 0
       }));
 
-      // Apply the “Only Listed,” “Show Favorites,” and sort filters
+      // Apply filters/sorts
       const onlyListed = document.getElementById('only-listed').checked;
       const showFavs   = document.getElementById('show-favorites').checked;
       const sortOrder  = document.getElementById('sort-order').value;
@@ -232,7 +231,7 @@
       if (sortOrder==='asc')  tokens.sort((a,b)=>a.price - b.price);
       if (sortOrder==='desc') tokens.sort((a,b)=>b.price - a.price);
 
-      // Render the grid
+      // Render gallery
       const gallery = document.getElementById('gallery');
       gallery.innerHTML = '';
       if (tokens.length === 0) {
@@ -241,17 +240,14 @@
       }
 
       for (const t of tokens) {
-        // Use Cloudflare’s gateway in case ipfs.io is slow; both usually work:
-        const imgUrl = t.hash
-          ? `https://cloudflare-ipfs.com/ipfs/${t.hash}`
-          : '';
-        const isFav = favorites.has(t.id.toString());
+        const imgUrl = t.hash ? `https://ipfs.io/ipfs/${t.hash}` : '';
+        const isFav  = favorites.has(t.id.toString());
 
-        // Build each card
+        // Create card
         const card = document.createElement('div');
         card.className = 'card' + (isFav ? ' favorited' : '');
 
-        // The main clickable area (link → Objkt asset page)
+        // Build link + content
         card.innerHTML = `
           <a href="https://objkt.com/asset/${CONTRACT}/${t.id}" target="_blank">
             <img src="${imgUrl}" alt="${t.name}">
@@ -262,7 +258,7 @@
           </a>
         `;
 
-        // Favorite‐toggle button (star) at top right
+        // Favorite button
         const favBtn = document.createElement('button');
         favBtn.className = 'favorite-btn';
         favBtn.textContent = isFav ? '★' : '☆';
@@ -287,7 +283,7 @@
       }
     }
 
-    // Wire up all of the controls
+    // Wire up controls
     btn.addEventListener('click', fetchAndRender);
     document.getElementById('only-listed').addEventListener('change', fetchAndRender);
     document.getElementById('sort-order').addEventListener('change', fetchAndRender);
