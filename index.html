@@ -360,10 +360,78 @@
       const onlyListed = document.getElementById('only-listed').checked;
       const showFavs   = document.getElementById('show-favorites').checked;
       const sortOrder  = document.getElementById('sort-order').value;
-      if (onlyListed) tokens = tokens.filter(t => t.listed);
-      if (showFavs)    tokens = tokens.filter(t => favorites.has(t.id.toString()));
-      if (sortOrder==='asc')  tokens.sort((a,b)=>a.price - b.price);
-      if (sortOrder==='desc') tokens.sort((a,b)=>b.price - a.price);
+      
+      // Save original search results
+      let filteredTokens = [...tokens];
+      
+      // Apply only-listed filter if needed
+      if (onlyListed) filteredTokens = filteredTokens.filter(t => t.listed);
+      
+      // Handle favorites differently
+      let favTokens = [];
+      if (showFavs) {
+        // Get all favorites (bypassing emoji filter)
+        const gqlFavs = `
+        {
+          token(
+            where: {
+              _and: [
+                { fa_contract: { _eq: "${CONTRACT}" } },
+                { token_id: { _in: [${Array.from(favorites).join(',')}] } }
+              ]
+            }
+          ) {
+            token_id
+            name
+            thumbnail_uri
+            listings_active { price_xtz }
+          }
+        }`;
+        
+        try {
+          const respFavs = await fetch('https://data.objkt.com/v3/graphql', {
+            method:'POST',
+            headers:{ 'Content-Type':'application/json' },
+            body: JSON.stringify({ query: gqlFavs })
+          });
+          const dataFavs = await respFavs.json();
+          
+          if (dataFavs.data && dataFavs.data.token) {
+            favTokens = dataFavs.data.token.map(t => ({
+              id:    t.token_id,
+              name:  t.name,
+              hash:  (t.thumbnail_uri||'').replace('ipfs://',''),
+              price: (t.listings_active[0]?.price_xtz||0)/1e6,
+              listed: t.listings_active.length > 0,
+              isFavorite: true
+            }));
+            
+            // Apply only-listed filter to favorites if needed
+            if (onlyListed) favTokens = favTokens.filter(t => t.listed);
+          }
+        } catch (err) {
+          console.error('Error fetching favorites:', err);
+        }
+      }
+      
+      // Apply sorting to both sets
+      if (sortOrder==='asc') {
+        filteredTokens.sort((a,b)=>a.price - b.price);
+        favTokens.sort((a,b)=>a.price - b.price);
+      }
+      if (sortOrder==='desc') {
+        filteredTokens.sort((a,b)=>b.price - a.price);
+        favTokens.sort((a,b)=>b.price - a.price);
+      }
+      
+      // Remove duplicates from filtered results that are already in favorites
+      if (favTokens.length > 0) {
+        const favIds = new Set(favTokens.map(t => t.id.toString()));
+        filteredTokens = filteredTokens.filter(t => !favIds.has(t.id.toString()));
+      }
+      
+      // Combine favorites and filtered results
+      tokens = [...favTokens, ...filteredTokens];
 
       // Render gallery
       const gallery = document.getElementById('gallery');
@@ -372,10 +440,40 @@
         gallery.textContent = 'No matches.';
         return;
       }
-
+      
+      // Add a visual separator between favorites and regular results if needed
+      let favSectionAdded = false;
+      
+      // Add favorites header if we have favorites
+      if (favTokens.length > 0) {
+        const favHeader = document.createElement('div');
+        favHeader.style.gridColumn = '1 / -1';
+        favHeader.style.margin = '0 0 15px 0';
+        favHeader.style.padding = '5px 0';
+        favHeader.style.textAlign = 'center';
+        favHeader.style.color = '#f1c40f';
+        favHeader.style.fontWeight = 'bold';
+        favHeader.textContent = '★ Favorites ★';
+        gallery.append(favHeader);
+      }
+      
       for (const t of tokens) {
         const imgUrl = t.hash ? `https://ipfs.io/ipfs/${t.hash}` : '';
-        const isFav  = favorites.has(t.id.toString());
+        const isFav  = t.isFavorite || favorites.has(t.id.toString());
+        
+        // Add visual separator if this is the first non-favorite after favorites
+        if (favSectionAdded === false && favTokens.length > 0 && !isFav) {
+          const separator = document.createElement('div');
+          separator.style.gridColumn = '1 / -1';
+          separator.style.borderTop = '1px solid #333';
+          separator.style.margin = '20px 0';
+          separator.style.padding = '5px 0';
+          separator.style.textAlign = 'center';
+          separator.style.color = '#888';
+          separator.textContent = 'Search Results';
+          gallery.append(separator);
+          favSectionAdded = true;
+        }
 
         // Create card
         const card = document.createElement('div');
